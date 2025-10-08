@@ -3,6 +3,7 @@ using CatalogService.CoreLib.DTOs.Requests;
 using CatalogService.CoreLib.Entities;
 using CatalogService.CoreLib.Interfaces;
 using CatalogService.Logic.Interfaces;
+using CatalogService.CoreLib.Utils;
 
 namespace CatalogService.Logic.Services
 {
@@ -35,7 +36,7 @@ namespace CatalogService.Logic.Services
             };
 
             var newProduct = await _productRepository.AddProductAsync(product);
-            return MapToProductDetailsDto(newProduct);
+            return Mapper.MapToProductDetailsDto(newProduct);
 
         }
 
@@ -47,13 +48,13 @@ namespace CatalogService.Logic.Services
         public async Task<ProductDetailsDto> GetProductAsync(Guid id)
         {
 
-            return MapToProductDetailsDto(await _productRepository.GetProductByIdAsync(id));
+            return Mapper.MapToProductDetailsDto(await _productRepository.GetProductByIdAsync(id));
         }
 
         public async Task<List<ProductDto>> GetProductsAsync(ProductFilter filter)
         {
             var products = await _productRepository.GetProductsAsync(filter);
-            return products.Select(MapToProductDto).ToList();
+            return products.Select(Mapper.MapToProductDto).ToList();
         }
 
         public async Task<ProductDetailsDto> UpdateProductAsync(Guid id, UpdateProductRequest request)
@@ -70,51 +71,8 @@ namespace CatalogService.Logic.Services
             product.ImageUrl = request.url;
 
             var updated = await _productRepository.UpdateProductAsync(product);
-            return MapToProductDetailsDto(updated);
+            return Mapper.MapToProductDetailsDto(updated);
 
-        }
-
-        private ProductDto MapToProductDto(Product product)
-        {
-            return new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Category = product.Category?.Name,
-                Brand = product.Brand,
-                Rating = product.Rating,
-                ReviewCount = product.ReviewCount,
-                imageUrl = product.ImageUrl,
-                CreatedAt = product.CreatedAt
-            };
-        }
-
-        private ProductDetailsDto MapToProductDetailsDto(Product product)
-        {
-            return new ProductDetailsDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Category = product.Category?.Name,
-                CategoryId = product.CategoryId,
-                Brand = product.Brand,
-                Rating = product.Rating,
-                ReviewCount = product.ReviewCount,
-                url = product.ImageUrl,
-                Reviews = product.Reviews.Select(r => new ProductReview
-                {
-                    Id = r.Id,
-                    UserName = r.UserName,
-                    Rating = r.Rating,
-                    Comment = r.Comment,
-                    CreatedAt = r.CreatedAt,
-                    Product = product
-                }).ToList()
-            };
         }
     }
 }

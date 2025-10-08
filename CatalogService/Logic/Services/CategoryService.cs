@@ -2,6 +2,7 @@
 using CatalogService.CoreLib.DTOs.Requests;
 using CatalogService.CoreLib.Entities;
 using CatalogService.CoreLib.Interfaces;
+using CatalogService.CoreLib.Utils;
 using CatalogService.Logic.Interfaces;
 
 namespace CatalogService.Logic.Services
@@ -26,7 +27,7 @@ namespace CatalogService.Logic.Services
                 ProductCount = 0
             };
             var createdCategory = await _categoryRepository.AddCategoryAsync(category);
-            return MapToCategoryDto(createdCategory);
+            return Mapper.MapToCategoryDto(createdCategory);
         }
 
         public async Task<bool> DeleteCategoryAsync(Guid id)
@@ -37,13 +38,13 @@ namespace CatalogService.Logic.Services
         public async Task<List<CategoryDto>> GetAllCategoriesAsync()
         {
             var categories = await _categoryRepository.GetAllCategoriesAsync();
-            return categories.Select(MapToCategoryDto).ToList();
+            return categories.Select(Mapper.MapToCategoryDto).ToList();
         }
 
         public async Task<CategoryDto> GetCategoryAsync(Guid id)
         {
             var category = await _categoryRepository.GetCategoryByIdASync(id);
-            return category == null ? null : MapToCategoryDto(category);
+            return category == null ? null : Mapper.MapToCategoryDto(category);
         }
 
         public async Task<CategoryDto> UpdateCategoryAsync(Guid id, CreateCategoryRequest request)
@@ -56,19 +57,7 @@ namespace CatalogService.Logic.Services
             category.ParentCategoryId = request.ParentCategoryId;
 
             var updated = await _categoryRepository.UpdateCategoryAsync(category);
-            return MapToCategoryDto(updated);
-        }
-
-        private CategoryDto MapToCategoryDto(Category category)
-        {
-            return new CategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                Description = category.Description,
-                ParentCategoryId = category.ParentCategoryId,
-                ProductCount = category.ProductCount,
-            };
+            return Mapper.MapToCategoryDto(updated);
         }
     }
 }
