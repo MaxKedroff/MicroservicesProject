@@ -35,5 +35,21 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="DTOs\BasketDto.cs" />
+    <Compile Include="DTOs\Mapper.cs" />
+    <Compile Include="Interfaces\IBasketLogService.cs" />
+    <Compile Include="Interfaces\IBasketService.cs" />
+    <Compile Include="Services\BasketLogService.cs" />
+    <Compile Include="Services\BasketService.cs" />
+    <Compile Include="Services\ProductServiceStub.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj">
+      <Project>{98324eaa-b307-4649-ab52-f9fabc28da93}</Project>
+      <Name>Domain</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

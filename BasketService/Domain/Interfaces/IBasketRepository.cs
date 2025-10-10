@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    interface IBasketRepository
+    public interface IBasketRepository
     {
 
         Task<Basket> GetBasketAsync(Guid userId);

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    interface IBasketLogRepository
+    public interface IBasketLogRepository
     {
         Task AddLogAsync(BasketOperationLog log);
-        Task<List<BasketOperationLog>> GetUserLogsAsync(string userId, int count = 50);
+        Task<List<BasketOperationLog>> GetUserLogsAsync(Guid userId, int count = 50);
     }
 }

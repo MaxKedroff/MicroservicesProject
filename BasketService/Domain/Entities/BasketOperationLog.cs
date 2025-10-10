@@ -9,7 +9,7 @@ namespace Domain.Entities
     /// <summary>
     /// сущность лога операции над корзиной. Хотим хранить каждое действие пользователя для возможной аналитики.
     /// </summary>
-    class BasketOperationLog
+    public class BasketOperationLog
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
@@ -17,7 +17,7 @@ namespace Domain.Entities
 
         public Guid? ProductId { get; set; }
 
-        public int? Quantity { get; set; }
+        public int? Amount { get; set; }
         public DateTime Timestamp { get; set; }
 
         public string details { get; set; }
