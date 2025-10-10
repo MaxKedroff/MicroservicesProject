@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    class BasketLogsRepository : IBasketLogRepository
+    public class BasketLogsRepository : IBasketLogRepository
     {
 
         private readonly BasketLogDbContext _context;

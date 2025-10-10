@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Data
 {
-    class BasketLogDbContext : DbContext
+    public class BasketLogDbContext : DbContext
     {
 
         public DbSet<BasketOperationLog> BasketOperationsLogs { get; set; }

@@ -27,5 +27,17 @@ namespace Application.DTOs
                 ItemsCount = basket.Items.Count
             };
         }
+
+        public static OperationLogDto MapToOperationLogDto(BasketOperationLog log)
+        {
+            return new OperationLogDto
+            {
+                Operation = log.Operation,
+                ProductId = log.ProductId,
+                Amount = log.Amount,
+                Timestamp = log.Timestamp,
+                Details = log.details
+            };
+        }
     }
 }
