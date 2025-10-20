@@ -9,14 +9,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Interfaces;
 using Application.Services;
-using Infrastructure.Repositories;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 
 
 using Domain.Interfaces;
-using Infrastructure.Data;
 using Microsoft.Extensions.Options;
+using Infrastructure.Repositories;
+using Infrastructure.Data;
+using TraceLib;
 
 namespace Application
 {
@@ -29,7 +30,7 @@ namespace Application
 
             services.AddScoped<IBasketRepository, BasketRepository>();
             services.AddScoped<IBasketLogRepository, BasketLogsRepository>();
-
+           
             return services;
         }
 
@@ -39,6 +40,11 @@ namespace Application
 
             services.AddDbContext<BasketLogDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("PostgreSQL")));
+
+            services.AddHttpClient("CatalogService", client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5000");
+            });
 
             return services;
         }

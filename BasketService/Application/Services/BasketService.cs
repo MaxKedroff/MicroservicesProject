@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.ExternalServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,20 +15,19 @@ namespace Application.Services
 
         private readonly IBasketRepository _basketRepository;
         private readonly IBasketLogService _logService;
-        // временная заглушка пока не будет добавлено взаимодействие между микросервисами
-        private readonly ProductServiceStub _productService;
+        private readonly ICatalogService _catalogService;
 
-        public BasketService(IBasketRepository basketRepository, IBasketLogService logService)
+
+        public BasketService(IBasketRepository basketRepository, IBasketLogService logService, ICatalogService catalogService)
         {
             _basketRepository = basketRepository;
             _logService = logService;
-            _productService = new ProductServiceStub();
-
+            _catalogService = catalogService;
         }
 
         public async Task<Basket> AddItemAsync(Guid userId, BasketItem item)
         {
-            var product = await _productService.GetProductInfoAsync(item.ProductId);
+            var product = await _catalogService.GetProductInfoAsync(item.ProductId);
 
             item.Name = product.Name;
             item.Price = product.Price;

@@ -6,13 +6,14 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
-
+using Core;
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpRequestService();
 
 builder.Services
     .AddInfrastructure(builder.Configuration)
