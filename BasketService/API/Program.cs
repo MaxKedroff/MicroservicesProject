@@ -6,15 +6,18 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
-using Core;
+using Core.HttpLogic;
+using CoreLib.HttpLogic.Services;
+using TraceLib;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpRequestService();
-
+builder.Services.AddHttpLogic();
+builder.Services.TryAddTraceId();
 builder.Services
     .AddInfrastructure(builder.Configuration)
     .AddApplication(builder.Configuration);

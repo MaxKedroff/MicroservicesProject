@@ -6,7 +6,7 @@
 	  <PackageOutputPath>D:\University\Ecommerce\LocalNuGet</PackageOutputPath>
 
 	  <PackageId>CoreLib</PackageId>
-	  <Version>1.0.0</Version>
+	  <Version>1.0.1</Version>
 	  <Authors>YourName</Authors>
 	  <Description>Shared core library</Description>
 	  <ImplicitUsings>enable</ImplicitUsings>

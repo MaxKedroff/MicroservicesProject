@@ -30,7 +30,7 @@ namespace Infrastructure.ExternalServices
 
                 HeaderDictionary = new Dictionary<string, string>
                 {
-                    ["TraceId"] = _traceIdAccessor.
+                    ["TraceId"] = _traceIdAccessor.GetValue()
                 }
             };
 
