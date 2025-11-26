@@ -12,4 +12,9 @@ namespace Application.DTOs
         public Guid UserId { get; init; }
         public List<BasketItem> Items { get; init; }
     }
+
+    public interface IBasketCheckoutStatusResponse
+    {
+        public Guid BasketId { get; }
+    }
 }

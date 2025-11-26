@@ -3,10 +3,20 @@ using CatalogService.DAL.Data;
 using CatalogService.DAL.Repositories;
 using CatalogService.Logic.Interfaces;
 using CatalogService.Logic.Services;
+using CatalogService.Saga.Activities;
+using CatalogService.Saga.Contracts;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.Reflection;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json")
+    .Build();
 
 
 builder.Services.AddControllers();
@@ -21,6 +31,28 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddMassTransit(x => {
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:Host"], "/", h =>
+        {
+            h.Username(builder.Configuration["RabbitMQ:Username"]);
+            h.Password(builder.Configuration["RabbitMQ:Password"]);
+        });
+
+        cfg.ReceiveEndpoint("reserve-inventory-execute", e =>
+        {
+            e.ExecuteActivityHost<ReserveInventoryActivity, IReserveInventoryArguments>(context);
+        });
+
+        cfg.ReceiveEndpoint("reserve-inventory-compensate", e =>
+        {
+            e.CompensateActivityHost<CancelInventoryReservationActivity, IReserveInventoryArguments>(context);
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 
 

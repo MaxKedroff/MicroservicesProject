@@ -28,6 +28,8 @@
 
         public string? ImageUrl { get; set; }
 
+        public int StockQuantity { get; set; }
+
         public Category? Category { get; set; }
         public List<ProductReview> Reviews { get; set; } = new();
 

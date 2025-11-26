@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Domain.Contracts;
 using Infrastructure.Sagas;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
@@ -37,6 +38,44 @@ namespace API.Controllers
                 SagaType = "Orchestration",
                 Message = "Basket checkout process started using orchestration pattern"
             });
+        }
+
+        [HttpPost("coordination")]
+        public async Task<IActionResult> StartCheckoutCoordination([FromBody] StartCheckoutRequest request)
+        {
+            var basketId = Guid.NewGuid();
+
+            await _publishEndpoint.Publish<IReserveInventoryArguments>(new
+            {
+                basketId,
+                request.Items
+            });
+
+            return Accepted(new
+            {
+                BasketId = basketId,
+                Status = "InventoryReservationStarted",
+                SagaType = "Coordination",
+                Message = "Inventory reservation started using coordination pattern"
+            });
+        }
+
+        [HttpGet("{basketId:guid}/status")]
+        public async Task<IActionResult> GetCheckoutStatus(Guid basketId)
+        {
+            try
+            {
+                var response = await _statusClient.GetResponse<IBasketCheckoutStatusResponse>(new
+                {
+                    BasketId = basketId
+                });
+
+                return Ok(response.Message);
+            }
+            catch (RequestTimeoutException)
+            {
+                return StatusCode(408, new { Message = "Request timeout" });
+            }
         }
     }
 }
