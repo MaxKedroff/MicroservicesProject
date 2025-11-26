@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cogito.MassTransit.EntityFrameworkCore" Version="1.0.34" />
     <PackageReference Include="CoreLib" Version="1.0.1" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
