@@ -11,6 +11,8 @@ namespace CatalogService.DAL.Data
         }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<CatalogReservation> CatalogReservations { get; set; }
+        public DbSet<ReservationItem> ReservationItems { get; set; }
 
         public DbSet<Category> Categories { get; set; }
 
@@ -43,6 +45,25 @@ namespace CatalogService.DAL.Data
                 .HasForeignKey(pr => pr.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<CatalogReservation>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.Property(r => r.Status).HasMaxLength(20);
+                entity.HasIndex(r => r.BasketId); 
+
+                entity.HasMany(r => r.Items)
+                      .WithOne(i => i.Reservation)
+                      .HasForeignKey(i => i.ReservationId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ReservationItem>(entity =>
+            {
+                entity.HasKey(i => i.Id);
+                entity.HasIndex(i => i.ProductId); 
+            });
+
 
             base.OnModelCreating(modelBuilder);
         }

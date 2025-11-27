@@ -1,15 +1,11 @@
-using Application.Interfaces;
-using Application.Services;
 using Application;
-using Domain.Interfaces;
 using Infrastructure.Data;
-using Infrastructure.Repositories;
-using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
-using Core.HttpLogic;
 using CoreLib.HttpLogic.Services;
 using TraceLib;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using MassTransit;
+
+using Infrastructure.Sagas;
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -21,6 +17,42 @@ builder.Services.TryAddTraceId();
 builder.Services
     .AddInfrastructure(builder.Configuration)
     .AddApplication(builder.Configuration);
+builder.Services.AddMassTransit(x =>
+{
+    x.AddSagaStateMachine<BasketCheckoutSaga, BasketCheckoutState>()
+        .EntityFrameworkRepository(r =>
+        {
+            r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
+            r.AddDbContext<DbContext, BasketSagaDbContext>((provider, options) =>
+            {
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+        });
+
+    x.AddRequestClient<IGetBasketCheckoutStatus>();
+
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:Host"], "/", h =>
+        {
+            h.Username(builder.Configuration["RabbitMQ:Username"]);
+            h.Password(builder.Configuration["RabbitMQ:Password"]);
+        });
+
+        cfg.ReceiveEndpoint("basket-checkout-saga", e =>
+        {
+            e.ConfigureSaga<BasketCheckoutState>(context);
+        });
+
+        cfg.ReceiveEndpoint("basket-inventory-responses", e =>
+        {
+            e.Bind("inventory-reserved");
+            e.Bind("inventory-reservation-failed");
+        });
+    });
+
+});
 
 
 var app = builder.Build();

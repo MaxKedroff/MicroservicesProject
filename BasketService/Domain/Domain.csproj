@@ -36,6 +36,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\BasketSagaContracts.cs" />
     <Compile Include="Entities\Basket.cs" />
     <Compile Include="Entities\BasketItem.cs" />
     <Compile Include="Entities\BasketOperationLog.cs" />
