@@ -2,7 +2,9 @@
 using Domain.Contracts;
 using Infrastructure.Sagas;
 using MassTransit;
+using CustomDistributedSemaphore;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace API.Controllers
 {
@@ -12,52 +14,93 @@ namespace API.Controllers
     {
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly IRequestClient<IGetBasketCheckoutStatus> _statusClient;
+        private readonly IDistributedSemaphoreFactory _semaphoreFactory;
 
-        public BasketCheckoutController(IPublishEndpoint publishEndpoint, IRequestClient<IGetBasketCheckoutStatus> statusClient)
+
+        public BasketCheckoutController(IPublishEndpoint publishEndpoint, IRequestClient<IGetBasketCheckoutStatus> statusClient, IDistributedSemaphoreFactory semaphoreFactory)
         {
             _publishEndpoint = publishEndpoint;
             _statusClient = statusClient;
+            _semaphoreFactory = semaphoreFactory;
         }
 
+        [HttpPost("orchestration")]
         public async Task<IActionResult> StartCheckoutOrchestration([FromBody] StartCheckoutRequest request)
         {
-            var basketId = Guid.NewGuid();
+            var semaphore = _semaphoreFactory.CreateSemaphore("checkout_orchestration", 5);
 
-            await _publishEndpoint.Publish<IGetBasketCheckoutStatus>(new
+            try
             {
-                basketId,
-                request.UserId,
-                request.Items,
-                DateTime.UtcNow
-            });
+                await semaphore.AcquireAsync(TimeSpan.FromSeconds(10));
 
-            return Accepted(new
+                var basketId = Guid.NewGuid();
+
+                await _publishEndpoint.Publish<IGetBasketCheckoutStatus>(new
+                {
+                    basketId,
+                    request.UserId,
+                    request.Items,
+                    DateTime.UtcNow
+                });
+
+                return Accepted(new
+                {
+                    BasketId = basketId,
+                    Status = "CheckoutStarted",
+                    SagaType = "Orchestration",
+                    Message = "Basket checkout process started using orchestration pattern"
+                });
+            }
+            catch (TimeoutException)
             {
-                BasketId = basketId,
-                Status = "CheckoutStarted",
-                SagaType = "Orchestration",
-                Message = "Basket checkout process started using orchestration pattern"
-            });
+                return StatusCode(429, new
+                {
+                    Message = "Too many concurrent checkout processes. Please try again later."
+                });
+            }
+            finally
+            {
+                await semaphore.ReleaseAsync();
+            }
+
         }
 
         [HttpPost("coordination")]
         public async Task<IActionResult> StartCheckoutCoordination([FromBody] StartCheckoutRequest request)
         {
-            var basketId = Guid.NewGuid();
+            var semaphore = _semaphoreFactory.CreateSemaphore("checkout_coordination", 3);
 
-            await _publishEndpoint.Publish<IReserveInventoryArguments>(new
+            try
             {
-                basketId,
-                request.Items
-            });
+                await semaphore.AcquireAsync(TimeSpan.FromSeconds(10));
+                var basketId = Guid.NewGuid();
 
-            return Accepted(new
+                await _publishEndpoint.Publish<IReserveInventoryArguments>(new
+                {
+                    basketId,
+                    request.Items
+                });
+
+                return Accepted(new
+                {
+                    BasketId = basketId,
+                    Status = "InventoryReservationStarted",
+                    SagaType = "Coordination",
+                    Message = "Inventory reservation started using coordination pattern"
+                });
+            }
+            catch (TimeoutException)
             {
-                BasketId = basketId,
-                Status = "InventoryReservationStarted",
-                SagaType = "Coordination",
-                Message = "Inventory reservation started using coordination pattern"
-            });
+                return StatusCode(429, new
+                {
+                    Message = "Too many concurrent checkout processes. Please try again later."
+                });
+            }
+            finally
+            {
+                await semaphore.ReleaseAsync();
+            }
+
         }
 
         [HttpGet("{basketId:guid}/status")]
