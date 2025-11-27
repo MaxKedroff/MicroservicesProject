@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using CoreLib.HttpLogic.Services;
 using TraceLib;
 using MassTransit;
+using CustomDistributedSemaphore;
 
 using Infrastructure.Sagas;
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpLogic();
 builder.Services.TryAddTraceId();
+builder.Services.AddCustomDistributedSemaphore(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379");
+
 builder.Services
     .AddInfrastructure(builder.Configuration)
     .AddApplication(builder.Configuration);

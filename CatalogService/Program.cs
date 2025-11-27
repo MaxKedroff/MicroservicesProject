@@ -5,6 +5,7 @@ using CatalogService.Logic.Interfaces;
 using CatalogService.Logic.Services;
 using CatalogService.Saga.Activities;
 using CatalogService.Saga.Contracts;
+using CustomDistributedSemaphore;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +23,7 @@ var configuration = new ConfigurationBuilder()
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddCustomDistributedSemaphore(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379");
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
